@@ -5,6 +5,7 @@ import com.despegar.atp.http.HttpClient;
 import com.despegar.atp.http.HttpClientBuilder;
 import com.despegar.atp.http.mapper.jackson.JacksonMapper;
 import com.despegar.atp.jwt.validators.ParseOption;
+import com.jcabi.aspects.Loggable;
 
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
@@ -12,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
-//holuuuu
+
 public class ATPClient {
 
     private final static String USER_HOME = "user.home";
@@ -21,27 +22,19 @@ public class ATPClient {
     private final static String CLIENT_CONFIGURATION_CLIENT_SECRET_PROPERTY = "clientSecret";
     private final static String CLIENT_CONFIGURATION_CLIENT_KEY_PROPERTY = "appKey";
 
-
-    public static void main(String... args) throws NoSuchAlgorithmException {
+    @Loggable(Loggable.DEBUG)
+    protected static String getToken() throws NoSuchAlgorithmException {
 
         Properties prop = new Properties();
         InputStream input = null;
 
         String home = System.getProperty(USER_HOME) + "/";
 
-        ATPClient o = new ATPClient();
-
         try {
 
             input = new FileInputStream(home + CLIENT_CONFIGURATION_FILE_NAME);
-
             // load a properties file
             prop.load(input);
-
-            // get the property value and print it out
-            System.out.println(prop.getProperty(CLIENT_CONFIGURATION_CLIENT_ID_PROPERTY) + " --- > clientId");
-            System.out.println(prop.getProperty(CLIENT_CONFIGURATION_CLIENT_SECRET_PROPERTY) + " ---- > applicationSecret ");
-
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -54,9 +47,6 @@ public class ATPClient {
                 }
             }
         }
-
-
-
 
         HttpClient apacheClient =
                 new HttpClientBuilder(HttpClientBuilder.ClientType.APACHE, SSLContext.getDefault()).build();
@@ -72,16 +62,10 @@ public class ATPClient {
                         .setDefaultParseOption(ParseOption.ALLOW_ANONYMOUS_SOURCE)
                         .build();
 
-
-
-       String x = client
-                .obtainJwt(client.grantFactory().clientCredentials(), "erdos","euler", "euler-service").asAuthorizationHeader();
-       System.out.println(x);
-       prop.setProperty("token",x);
-
-               // rest.interceptor(new interceptor)
-       //rest.resource().get()
-
+       String token = client
+                .obtainJwt(client.grantFactory().clientCredentials(),
+                        "erdos","euler", "euler-service").asAuthorizationHeader();
+       return token;
     }
 
 
@@ -90,13 +74,13 @@ public class ATPClient {
         //check euler
     }
 
-    public static void createNewToken(ATP3Client client) {
-        String x =
+    public static String createNewToken(ATP3Client client) {
+        String authHeader =
                 client
                         .obtainJwt(client.grantFactory().clientCredentials(), "erdos","euler","euler-service")
 
                         .asAuthorizationHeader();
-        System.out.println(x);
+        return authHeader;
     }
 
 

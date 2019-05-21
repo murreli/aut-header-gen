@@ -1,32 +1,76 @@
-import com.despegar.atp.ATP3Client;
-import com.despegar.atp.http.HttpClientBuilder;
+
+
+import com.google.gson.JsonArray;
+import com.google.gson.annotations.JsonAdapter;
+import com.jcabi.aspects.Loggable;
+import despegar.Utils;
 import io.restassured.http.ContentType;
-import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import org.junit.Assert;
-import org.junit.Test;
+import org.json.simple.JSONObject;
+import org.junit.*;
+import sun.plugin.javascript.JSObject;
 
 import javax.net.ssl.SSLContext;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.responseSpecification;
+
 
 public class RAssured {
 
+    String atpToken;
+
+    @Before
+    public void setUp() {
+        atpToken = "";
+        try {
+            atpToken = Utils.getATPToken();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void RestAssuredTest() {
 
-        RequestSpecification request = given().header("Authorization", "Bearer eyJraWQiOiJhdHAkMTIzIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJwMTNuLWUyZS10ZXN0cyIsImF1ZCI6WyJlcmRvcyIsInAxM24tZTJlLXRlc3RzIl0sInJjIjpbeyJhcHAiOiJlcmRvcyIsImN0eCI6W3t9XSwicGVyIjpbIlJFQUQiXX1dLCJpc3MiOiJodHRwczpcL1wvYXV0aC5kZXNwZWdhci5jb20iLCJleHAiOjE1MzMwNDcxMzIsImp0aSI6ImE0YmI1Mzg4LWY1NTEtNGE4MS05M2Q4LWEwN2I2YjQzMDZlNyJ9.aMdlfwDRBEq4ufa2Bgv4-Fc-kp34VBDCYN61BTqXgLZ-wXPmaufvjrt1dSGDlewA9Flsu3Dqyq9qkAzEYINeKI9LmQi8ps_OhxDBy54z1rrRCh6CxD8KodiyiiKCUqTEDtTUSSYydYlE9y5GOsvuovGwBKB1ob7NDSyDOtPhUlG1B7pCzxUYpSGChEFGmLDaSpDtnNkPTnqCV4-bhxpJ4ZndGOMI9L1MvbCoFUkrvCYJ0q3aAIvgaIZY-ZY5-jjrag9-2F4o8Zp-ihOKIEI4BgF3H8QciO03Ez6kg5bQQq3OXD5zsTgExKMucoEp_XQOvVquAMB2lIPddGYKp8cTAQ").request();
-        request.header("x-client","test");
+        RequestSpecification request = given().header("Authorization", atpToken).request();
+        request.header("x-client", "test");
         request.log().all();
         request.contentType(ContentType.JSON);
         Response res = request.when().get("http://backoffice-aws.despegar.com/erdos-service/v3/users/email:marcelo.urreli@despegar.com/relationships");
-        Assert.assertEquals(200,res.getStatusCode());
-
+        Assert.assertEquals(200, res.getStatusCode());
+        Response body = res.then().contentType(ContentType.JSON).extract().response();
     }
+
+    @Test
+    public void RestAssuredTest3() {
+
+        RequestSpecification request = given().header("Authorization", atpToken).request();
+        request.header("x-client", "test");
+        request.log().all();
+        request.contentType(ContentType.JSON);
+        Response res = request.when().get("http://backoffice-aws.despegar.com/erdos-service/v3/users/email:marcelo.urreli@despegar.com/relationships")
+                .then().contentType(ContentType.JSON).extract().response();
+
+        System.out.println(res.getStatusCode() + "    SERVER STATUS");
+
+       Map<String, String> company = res.jsonPath().getMap("relationships");
+
+
+
+       System.out.println(company.containsKey("type"));
+
+   }
+
+
+
 
     @Test
     public void RestAssuredTest2() {
@@ -40,7 +84,7 @@ public class RAssured {
          *
          *     val apacheClient = new HttpClientBuilder(ClientType.APACHE, SSLContext.getDefault).build
          *     val clientId = PrometeoConfig.getStringOrDefault("p13n.prometeo.atp3.clientId", "")
-         *     val clientSecret = PrometeoConfig.getString("p13n.prometeo.atp3.clientSecret")
+         *     val clientSecret = PrometeoConfig.getString("p13n.prometeo.axtp3.clientSecret")
          *     val privateKey = PrometeoConfig.getString("p13n.prometeo.atp3.privateKey")
          *     val atpEndpoint = PrometeoConfig.getStringOrDefault("p13n.prometeo.atp3.atpEndpoint", "https://auth")
          *     val atp3Client = new ATP3Client.Builder(clientId, clientSecret, privateKey, atpEndpoint)
@@ -50,10 +94,7 @@ public class RAssured {
          *       .build
          *     new ATP3Helper(atp3Client, applicationsScope, newrelicScheduler)
          */
+
+
     }
-
-
-
-
 }
-
